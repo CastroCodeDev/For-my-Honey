@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  min-height:100vh;
+  background: linear-gradient(135deg,#ffe4ec 0%,#fff0f5 40%,#fce4ff 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Nunito',sans-serif; overflow:hidden; position:relative;
+}
+.hearts-bg { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:0; }
+.floating-heart { position:absolute; animation:floatUp linear infinite; opacity:0.18; }
+@keyframes floatUp {
+  0% { transform:translateY(110vh) rotate(0deg); opacity:0.18; }
+  100% { transform:translateY(-10vh) rotate(20deg); opacity:0; }
+}
+.card {
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(12px);
+  border-radius:32px;
+  padding:40px 36px 36px;
+  text-align:center;
+  max-width:400px; width:90vw;
+  box-shadow:0 8px 48px rgba(220,80,120,0.18),0 2px 12px rgba(220,80,120,0.10);
+  position:relative; z-index:1;
+  animation:fadeIn 0.6s ease;
+}
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(20px) scale(0.97); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+.kr-tag {
+  display:inline-block;
+  background:linear-gradient(90deg,#f06292,#e040fb);
+  color:#fff; border-radius:50px;
+  padding:4px 20px; font-family:'Dancing Script',cursive;
+  font-size:1.2rem; font-weight:700; letter-spacing:1px; margin-bottom:6px;
+}
+.subtitle { font-family:'Dancing Script',cursive; color:#e87aab; font-size:1.05rem; margin-bottom:4px; }
+.big-heart { font-size:3.2rem; display:block; margin:6px 0 8px; animation:heartbeat 1.4s ease-in-out infinite; }
+@keyframes heartbeat {
+  0%,100%{transform:scale(1);} 30%{transform:scale(1.13);} 60%{transform:scale(0.97);}
+}
+.step-indicator { font-size:0.8rem; color:#c994b0; font-weight:600; margin-bottom:4px; letter-spacing:0.4px; }
+.progress-bar-wrap { background:#fce4ef; border-radius:50px; height:6px; margin-bottom:18px; overflow:hidden; }
+.progress-bar { height:100%; border-radius:50px; background:linear-gradient(90deg,#f06292,#e040fb); transition:width 0.5s ease; }
+.question { font-size:1.3rem; color:#7a3050; font-weight:700; margin-bottom:10px; line-height:1.4; min-height:56px; }
+.counter-label { font-size:0.82rem; color:#e87aab; font-weight:600; margin-bottom:14px; min-height:18px; }
+
+.btn-row {
+  display:flex; gap:14px; justify-content:center; align-items:center;
+}
+
+.btn-yes {
+  background:linear-gradient(135deg,#f06292,#e91e8c);
+  color:#fff; border:none; border-radius:50px; padding:13px 44px;
+  font-size:1.1rem; font-family:'Nunito',sans-serif; font-weight:700;
+  cursor:pointer; transition:transform 0.15s,box-shadow 0.15s;
+  box-shadow:0 4px 18px rgba(233,30,140,0.28);
+}
+.btn-yes:hover { transform:scale(1.07); box-shadow:0 6px 24px rgba(233,30,140,0.38); }
+.btn-yes:active { transform:scale(0.98); }
+
+.btn-no {
+  background:#fff0f5; color:#c94479; border:2px solid #f8b4cc;
+  border-radius:50px; padding:10px 28px; font-size:0.95rem;
+  font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer;
+  position:fixed; z-index:10; white-space:nowrap;
+  transition:font-size 0.2s, padding 0.2s;
+}
+
+.message-box { display:none; flex-direction:column; align-items:center; gap:10px; animation:fadeIn 0.6s ease; }
+.message-box.active { display:flex; }
+.message-big { font-size:3.4rem; }
+.message-text { font-family:'Dancing Script',cursive; font-size:1.7rem; color:#c94479; line-height:1.35; }
+.message-sub { font-size:0.92rem; color:#a05070; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<div class="card" id="mainCard">
+  <div id="questionView">
+    <span class="kr-tag">K + R 💕</span>
+    <p class="subtitle">para meu benzinho</p>
+    <span class="big-heart" id="stepHeart">🫶</span>
+    <p class="step-indicator" id="stepIndicator">pergunta 1 de 16</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:6%"></div></div>
+    <p class="question" id="questionText">Você me ama?</p>
+    <p class="counter-label" id="counterLabel"> </p>
+    <div class="btn-row">
+      <button class="btn-yes" id="btnYes" onclick="handleYes()">Sim 💕</button>
+      <button class="btn-no" id="btnNo" onmouseenter="runAway()" ontouchstart="runAway(event)">Não</button>
+    </div>
+  </div>
+
+  <div class="message-box" id="messageView">
+    <span class="kr-tag">K + R 💕</span>
+    <span class="message-big">🥰</span>
+    <p class="message-text">Eu sabia de tudo!<br>Eu também te amo demais!</p>
+    <p class="message-sub">Feliz Dia dos Namorados, meu benzinho 💖</p>
+    <p style="font-size:0.88rem;color:#c94479;margin-top:6px;">você é a pessoa mais especial da minha vida ✨</p>
+  </div>
+</div>
+
+<script>
+const steps = [
+  { emoji:"🫶", q:"Você me ama?" },
+  { emoji:"🥰", q:"Você gosta de ser minha namorada?" },
+  { emoji:"💑", q:"Eu sou seu favorito?" },
+  { emoji:"🌸", q:"Você ficaria comigo pra sempre?" },
+  { emoji:"💌", q:"Eu te faço feliz?" },
+  { emoji:"🦋", q:"Você confia em mim?" },
+  { emoji:"🌙", q:"Você pensa em mim antes de dormir?" },
+  { emoji:"☀️", q:"Quando acorda, lembra de mim?" },
+  { emoji:"🎶", q:"Tem música que te faz pensar em mim?" },
+  { emoji:"🤗", q:"Meu abraço é o melhor do mundo?" },
+  { emoji:"😂", q:"Eu consigo te fazer rir do nada?" },
+  { emoji:"🍕", q:"Dividiria a última fatia de pizza comigo?" },
+  { emoji:"🌍", q:"Me levaria em qualquer viagem?" },
+  { emoji:"🌟", q:"Eu sou a pessoa mais especial da sua vida?" },
+  { emoji:"🐾", q:"Me escolheria de novo se pudesse?" },
+  { emoji:"💍", q:"Quer ficar comigo pra sempre?" },
+];
+
+let current = 0;
+let noCount = 0;
+let noSize = 15;
+const btnNo = document.getElementById('btnNo');
+const total = steps.length;
+
+function syncNoToCard() {
+  const card = document.getElementById('mainCard');
+  const btnRow = card.querySelector('.btn-row');
+  const rowRect = btnRow.getBoundingClientRect();
+  const btnYes = document.getElementById('btnYes');
+  const yesRect = btnYes.getBoundingClientRect();
+
+  // posiciona o Não ao lado do Sim inicialmente
+  btnNo.style.top = yesRect.top + 'px';
+  btnNo.style.left = (yesRect.right + 14) + 'px';
+}
+
+window.addEventListener('load', () => { syncNoToCard(); generateHearts(); });
+window.addEventListener('resize', syncNoToCard);
+
+function runAway(e) {
+  if (e) e.preventDefault();
+  noCount++;
+  const label = document.getElementById('counterLabel');
+  label.textContent = `já tentou ${noCount}x 😂`;
+  const m = 16, bw = btnNo.offsetWidth + 4, bh = btnNo.offsetHeight + 4;
+  let x, y, tries = 0;
+  do {
+    x = Math.floor(Math.random() * (window.innerWidth - bw - m*2)) + m;
+    y = Math.floor(Math.random() * (window.innerHeight - bh - m*2)) + m;
+    tries++;
+  } while (tries < 20 && isOverCard(x, y, bw, bh));
+  btnNo.style.left = x + 'px';
+  btnNo.style.top = y + 'px';
+  if (noCount <= 6 && noSize > 9) {
+    noSize = Math.max(9, noSize - 1);
+    btnNo.style.fontSize = noSize + 'px';
+    const p = Math.max(5, 10 - noCount);
+    const px = Math.max(10, 28 - noCount * 3);
+    btnNo.style.padding = p + 'px ' + px + 'px';
+  }
+}
+
+function isOverCard(x, y, bw, bh) {
+  const card = document.getElementById('mainCard');
+  const r = card.getBoundingClientRect();
+  return !(x + bw < r.left || x > r.right || y + bh < r.top || y > r.bottom);
+}
+
+function handleYes() {
+  burst(8);
+  current++;
+  if (current >= total) {
+    document.getElementById('questionView').style.display = 'none';
+    document.getElementById('messageView').classList.add('active');
+    btnNo.style.display = 'none';
+    bigBurst();
+  } else {
+    const s = steps[current];
+    document.getElementById('stepHeart').textContent = s.emoji;
+    document.getElementById('questionText').textContent = s.q;
+    document.getElementById('stepIndicator').textContent = `pergunta ${current+1} de ${total}`;
+    document.getElementById('progressBar').style.width = ((current+1)/total*100) + '%';
+    document.getElementById('counterLabel').textContent = ' ';
+    noCount = 0; noSize = 15;
+    btnNo.style.fontSize = noSize + 'px';
+    btnNo.style.padding = '10px 28px';
+    setTimeout(syncNoToCard, 50);
+    const view = document.getElementById('questionView');
+    view.style.animation = 'none'; view.offsetHeight; view.style.animation = 'fadeIn 0.4s ease';
+  }
+}
+
+function burst(n) {
+  const emojis = ['💕','💖','🌸','✨','💝','💓'];
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.cssText = `position:fixed;font-size:${1+Math.random()*1.2}rem;
+      left:${Math.random()*100}vw;top:${Math.random()*100}vh;
+      pointer-events:none;z-index:999;
+      animation:burstAnim ${0.7+Math.random()*0.8}s ease forwards;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 1600);
+  }
+}
+
+function bigBurst() {
+  const emojis = ['💕','💖','💗','🌸','✨','💝','🥰','💓','🎉','🌷','🦋','🍓'];
+  for (let i = 0; i < 35; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.cssText = `position:fixed;font-size:${1.2+Math.random()*2}rem;
+        left:${Math.random()*100}vw;top:${Math.random()*100}vh;
+        pointer-events:none;z-index:999;
+        animation:burstAnim ${0.9+Math.random()*1.2}s ease forwards;`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2400);
+    }, i * 55);
+  }
+}
+
+function generateHearts() {
+  const bg = document.getElementById('heartsBg');
+  const syms = ['❤️','💕','🌸','💖','✨'];
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement('div');
+    h.className = 'floating-heart';
+    h.textContent = syms[Math.floor(Math.random()*syms.length)];
+    h.style.left = Math.random()*100+'vw';
+    h.style.animationDuration = (8+Math.random()*10)+'s';
+    h.style.animationDelay = (-Math.random()*12)+'s';
+    h.style.fontSize = (0.9+Math.random()*1.1)+'rem';
+    bg.appendChild(h);
+  }
+}
+</script>
+
+<style>
+@keyframes burstAnim {
+  0% { transform:scale(0.5) translateY(0); opacity:1; }
+  100% { transform:scale(1.6) translateY(-90px); opacity:0; }
+}
+</style>
+</body>
+</html>
